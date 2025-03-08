@@ -9,6 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Users, Plus } from 'lucide-react';
+import { InputWithSearch } from '@/components/ui/input-with-search';
 
 interface Student {
   id: string;
@@ -56,6 +57,19 @@ const mockStudents: Student[] = [
 
 export default function StudentManagement() {
   const [students] = useState<Student[]>(mockStudents);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value.toLowerCase());
+  };
+
+  const filteredStudents = students.filter(
+    (student) =>
+      student.name.toLowerCase().includes(searchTerm) ||
+      student.registrationNumber.toLowerCase().includes(searchTerm) ||
+      student.roomNumber.toLowerCase().includes(searchTerm) ||
+      student.course.toLowerCase().includes(searchTerm)
+  );
 
   return (
     <div className="space-y-8">
@@ -70,6 +84,15 @@ export default function StudentManagement() {
           <Plus className="mr-2 h-4 w-4" />
           Add Student
         </Button>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="flex-1">
+          <InputWithSearch
+            onSearch={handleSearch}
+            placeholder="Search by name, registration number, room, or course..."
+          />
+        </div>
       </div>
 
       <div className="rounded-xl border bg-card">
@@ -87,7 +110,7 @@ export default function StudentManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.map((student) => (
+            {filteredStudents.map((student) => (
               <TableRow key={student.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">

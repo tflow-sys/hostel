@@ -9,6 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Building2, Plus } from 'lucide-react';
+import { InputWithSearch } from '@/components/ui/input-with-search';
 
 interface Room {
   id: string;
@@ -48,6 +49,18 @@ const mockRooms: Room[] = [
 
 export default function RoomManagement() {
   const [rooms] = useState<Room[]>(mockRooms);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value.toLowerCase());
+  };
+
+  const filteredRooms = rooms.filter(
+    (room) =>
+      room.number.toLowerCase().includes(searchTerm) ||
+      room.type.toLowerCase().includes(searchTerm) ||
+      room.status.toLowerCase().includes(searchTerm)
+  );
 
   return (
     <div className="space-y-8">
@@ -57,6 +70,15 @@ export default function RoomManagement() {
           <Plus className="mr-2 h-4 w-4" />
           Add Room
         </Button>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="flex-1">
+          <InputWithSearch
+            onSearch={handleSearch}
+            placeholder="Search by room number, type, or status..."
+          />
+        </div>
       </div>
 
       <div className="rounded-md border">
@@ -72,7 +94,7 @@ export default function RoomManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rooms.map((room) => (
+            {filteredRooms.map((room) => (
               <TableRow key={room.id}>
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-2">
@@ -83,7 +105,19 @@ export default function RoomManagement() {
                 <TableCell>{room.type}</TableCell>
                 <TableCell>{room.capacity}</TableCell>
                 <TableCell>{room.occupied}</TableCell>
-                <TableCell>{room.status}</TableCell>
+                <TableCell>
+                  <span
+                    className={`status-badge ${
+                      room.status === 'Available'
+                        ? 'status-badge-available'
+                        : room.status === 'Full'
+                        ? 'status-badge-full'
+                        : 'status-badge-maintenance'
+                    }`}
+                  >
+                    {room.status}
+                  </span>
+                </TableCell>
                 <TableCell>
                   <Button variant="ghost" size="sm">
                     View Details
