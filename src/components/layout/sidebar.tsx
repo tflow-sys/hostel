@@ -10,15 +10,22 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
+  ClipboardCheck,
+  Users,
+  BedDouble,
+  Settings,
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Room Management', href: '/rooms', icon: Building2 },
+  { name: 'Room Management', href: '/rooms', icon: BedDouble },
+  { name: 'Student Management', href: '/students', icon: Users },
   { name: 'Fee Management', href: '/fees', icon: CreditCard },
   { name: 'Complaints', href: '/complaints', icon: MessageSquare },
   { name: 'Attendance', href: '/attendance', icon: UserCheck },
+  { name: 'Clearance', href: '/clearance', icon: ClipboardCheck },
   { name: 'Reports', href: '/reports', icon: BarChart3 },
+  { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 interface SidebarProps {
@@ -75,7 +82,7 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                       <Link
                         to={item.href}
                         className={cn(
-                          'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
+                          'flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
                           isActive
                             ? 'bg-primary text-primary-foreground'
                             : 'hover:bg-accent hover:text-accent-foreground',

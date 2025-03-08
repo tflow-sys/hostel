@@ -6,33 +6,67 @@ import {
   Percent,
   ArrowUpRight,
   ArrowDownRight,
+  BedDouble,
+  Utensils,
+  Bell,
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Button } from "@/components/ui/button";
 
 const occupancyData = [
-  { month: "Jan", occupancy: 85 },
-  { month: "Feb", occupancy: 88 },
-  { month: "Mar", occupancy: 90 },
-  { month: "Apr", occupancy: 92 },
-  { month: "May", occupancy: 89 },
-  { month: "Jun", occupancy: 87 },
+  { month: "Jan", occupancy: 85, revenue: 45000000 },
+  { month: "Feb", occupancy: 88, revenue: 48000000 },
+  { month: "Mar", occupancy: 90, revenue: 52000000 },
+  { month: "Apr", occupancy: 92, revenue: 49000000 },
+  { month: "May", occupancy: 89, revenue: 51000000 },
+  { month: "Jun", occupancy: 87, revenue: 50000000 },
+];
+
+const notifications = [
+  {
+    id: 1,
+    title: "Room Maintenance Alert",
+    description: "Block A needs urgent plumbing maintenance",
+    time: "10 minutes ago",
+    type: "alert",
+  },
+  {
+    id: 2,
+    title: "New Room Allocation",
+    description: "15 new students allocated to Block B",
+    time: "30 minutes ago",
+    type: "info",
+  },
+  {
+    id: 3,
+    title: "Fee Payment Due",
+    description: "20 students have pending payments",
+    time: "1 hour ago",
+    type: "warning",
+  },
 ];
 
 export default function Dashboard() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4">
-        <h2 className="text-3xl font-bold tracking-tight">Welcome back</h2>
-        <p className="text-muted-foreground">
-          Here's an overview of your hostel's performance
-        </p>
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
+        <div className="flex items-center justify-between">
+          <p className="text-muted-foreground">
+            Monitor and manage hostel operations efficiently
+          </p>
+          <Button>
+            <Bell className="mr-2 h-4 w-4" />
+            View All Notifications
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Rooms</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <BedDouble className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="stat-card">
@@ -51,9 +85,7 @@ export default function Dashboard() {
 
         <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Students
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -73,9 +105,7 @@ export default function Dashboard() {
 
         <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Complaints
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Active Complaints</CardTitle>
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -95,9 +125,7 @@ export default function Dashboard() {
 
         <Card className="dashboard-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Occupancy Rate
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Occupancy Rate</CardTitle>
             <Percent className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -116,71 +144,143 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 md:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Occupancy Trend</CardTitle>
+            <CardTitle>Occupancy & Revenue Trends</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[350px]">
-              <BarChart
-                width={600}
-                height={350}
-                data={occupancyData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Bar
-                  dataKey="occupancy"
-                  fill="hsl(var(--primary))"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={occupancyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip />
+                  <Bar
+                    yAxisId="left"
+                    dataKey="occupancy"
+                    fill="hsl(var(--primary))"
+                    radius={[4, 4, 0, 0]}
+                    name="Occupancy %"
+                  />
+                  <Bar
+                    yAxisId="right"
+                    dataKey="revenue"
+                    fill="hsl(var(--chart-2))"
+                    radius={[4, 4, 0, 0]}
+                    name="Revenue (UGX)"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
 
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Recent Activities</CardTitle>
+            <CardTitle>Recent Notifications</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-8">
-              <div className="flex items-center">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    New student check-in
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Room A101 assigned to John Doe
-                  </p>
+              {notifications.map((notification) => (
+                <div key={notification.id} className="flex items-start gap-4">
+                  <span
+                    className={`mt-1 rounded-full p-2 ${
+                      notification.type === 'alert'
+                        ? 'bg-red-100 text-red-600 dark:bg-red-900/30'
+                        : notification.type === 'warning'
+                        ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30'
+                        : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30'
+                    }`}
+                  >
+                    {notification.type === 'alert' ? (
+                      <AlertCircle className="h-4 w-4" />
+                    ) : notification.type === 'warning' ? (
+                      <Bell className="h-4 w-4" />
+                    ) : (
+                      <Building2 className="h-4 w-4" />
+                    )}
+                  </span>
+                  <div className="flex-1 space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {notification.title}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {notification.description}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {notification.time}
+                    </p>
+                  </div>
                 </div>
-                <div className="ml-auto font-medium">2m ago</div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button className="w-full justify-start" variant="outline">
+              <BedDouble className="mr-2 h-4 w-4" />
+              Allocate Rooms
+            </Button>
+            <Button className="w-full justify-start" variant="outline">
+              <AlertCircle className="mr-2 h-4 w-4" />
+              Report Maintenance
+            </Button>
+            <Button className="w-full justify-start" variant="outline">
+              <Utensils className="mr-2 h-4 w-4" />
+              Manage Meal Plans
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Room Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Available Rooms</span>
+                <span className="font-medium">25</span>
               </div>
-              <div className="flex items-center">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    Maintenance completed
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Plumbing issue in Room B202 resolved
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">1h ago</div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Under Maintenance</span>
+                <span className="font-medium">5</span>
               </div>
-              <div className="flex items-center">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    Payment received
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Hostel fee payment from Jane Smith
-                  </p>
-                </div>
-                <div className="ml-auto font-medium">3h ago</div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Reserved</span>
+                <span className="font-medium">10</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Today's Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">New Check-ins</span>
+                <span className="font-medium">8</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Pending Complaints</span>
+                <span className="font-medium">3</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Visitors Today</span>
+                <span className="font-medium">15</span>
               </div>
             </div>
           </CardContent>
