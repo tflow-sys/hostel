@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -7,22 +9,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { ClipboardCheck, Plus, Search } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { InputWithSearch } from '@/components/ui/input-with-search';
-import { Badge } from '@/components/ui/badge';
-import { toast } from '@/hooks/use-toast';
+} from "@/components/ui/table";
+import { ClipboardCheck, Plus } from "lucide-react";
+import { InputWithSearch } from "@/components/ui/input-with-search";
+import { Badge } from "@/components/ui/badge";
+// import { useToast } from "@/hooks/use-toast";
+import { StudentClearanceModal } from "./student-clearance-modal";
 
 interface ClearanceItem {
   name: string;
-  status: 'cleared' | 'pending' | 'failed';
+  status: "cleared" | "pending" | "failed";
   description?: string;
 }
 
@@ -31,125 +27,237 @@ interface Clearance {
   studentName: string;
   registrationNumber: string;
   roomNumber: string;
-  clearanceType: 'Semester End' | 'Final' | 'Transfer';
+  clearanceType: "Semester End" | "Final" | "Transfer";
   items: {
     fees: boolean;
     room: boolean;
     library: boolean;
     property: boolean;
   };
-  status: 'Pending' | 'In Progress' | 'Cleared' | 'Rejected';
+  status: "Pending" | "In Progress" | "Cleared" | "Rejected";
   submittedDate: string;
   clearanceItems: ClearanceItem[];
+  department?: string;
+  photoUrl?: string;
 }
+
+type ClearanceStatus = "approved" | "pending" | "rejected";
+
+// Map clearance status to the format expected by StudentClearanceModal
+const mapClearanceStatus = (
+  status: "cleared" | "pending" | "failed"
+): ClearanceStatus => {
+  switch (status) {
+    case "cleared":
+      return "approved";
+    case "pending":
+      return "pending";
+    case "failed":
+      return "rejected";
+    default:
+      return "pending";
+  }
+};
 
 const mockClearances: Clearance[] = [
   {
-    id: '1',
-    studentName: 'John Doe',
-    registrationNumber: 'NKU/2024/001',
-    roomNumber: 'A101',
-    clearanceType: 'Semester End',
+    id: "1",
+    studentName: "John Doe",
+    registrationNumber: "NKU/2024/001",
+    roomNumber: "A101",
+    clearanceType: "Semester End",
     items: {
       fees: true,
       room: true,
       library: false,
       property: true,
     },
-    status: 'In Progress',
-    submittedDate: '2024-03-15',
+    status: "In Progress",
+    submittedDate: "2024-03-15",
     clearanceItems: [
-      { name: 'Outstanding Fees', status: 'cleared', description: 'All fees paid' },
-      { name: 'Room Condition', status: 'cleared', description: 'Room in good condition' },
-      { name: 'Library Books', status: 'pending', description: '2 books pending return' },
-      { name: 'Property Damage', status: 'cleared', description: 'No damage reported' },
-      { name: 'Disciplinary Record', status: 'cleared', description: 'No incidents reported' },
+      {
+        name: "Outstanding Fees",
+        status: "cleared",
+        description: "All fees paid",
+      },
+      {
+        name: "Room Condition",
+        status: "cleared",
+        description: "Room in good condition",
+      },
+      {
+        name: "Library Books",
+        status: "pending",
+        description: "2 books pending return",
+      },
+      {
+        name: "Property Damage",
+        status: "cleared",
+        description: "No damage reported",
+      },
+      {
+        name: "Disciplinary Record",
+        status: "cleared",
+        description: "No incidents reported",
+      },
     ],
+    department: "Computer Science",
+    photoUrl: "https://images.app.goo.gl/gK7qGEQfcGnVWwQd8",
   },
   {
-    id: '2',
-    studentName: 'Jane Smith',
-    registrationNumber: 'NKU/2024/002',
-    roomNumber: 'B202',
-    clearanceType: 'Final',
+    id: "2",
+    studentName: "Jane Smith",
+    registrationNumber: "NKU/2024/002",
+    roomNumber: "B202",
+    clearanceType: "Final",
     items: {
       fees: true,
       room: true,
       library: true,
       property: true,
     },
-    status: 'Cleared',
-    submittedDate: '2024-03-14',
+    status: "Cleared",
+    submittedDate: "2024-03-14",
     clearanceItems: [
-      { name: 'Outstanding Fees', status: 'cleared', description: 'All fees paid' },
-      { name: 'Room Condition', status: 'cleared', description: 'Room in good condition' },
-      { name: 'Library Books', status: 'cleared', description: 'All books returned' },
-      { name: 'Property Damage', status: 'cleared', description: 'No damage reported' },
-      { name: 'Disciplinary Record', status: 'cleared', description: 'No incidents reported' },
+      {
+        name: "Outstanding Fees",
+        status: "cleared",
+        description: "All fees paid",
+      },
+      {
+        name: "Room Condition",
+        status: "cleared",
+        description: "Room in good condition",
+      },
+      {
+        name: "Library Books",
+        status: "cleared",
+        description: "All books returned",
+      },
+      {
+        name: "Property Damage",
+        status: "cleared",
+        description: "No damage reported",
+      },
+      {
+        name: "Disciplinary Record",
+        status: "cleared",
+        description: "No incidents reported",
+      },
     ],
+    department: "Business Administration",
+    photoUrl: "https://images.app.goo.gl/gK7qGEQfcGnVWwQd8",
   },
   {
-    id: '3',
-    studentName: 'Mike Johnson',
-    registrationNumber: 'NKU/2023/150',
-    roomNumber: 'C303',
-    clearanceType: 'Transfer',
+    id: "3",
+    studentName: "Mike Johnson",
+    registrationNumber: "NKU/2023/150",
+    roomNumber: "C303",
+    clearanceType: "Transfer",
     items: {
       fees: false,
       room: true,
       library: true,
       property: false,
     },
-    status: 'Pending',
-    submittedDate: '2024-03-16',
+    status: "Pending",
+    submittedDate: "2024-03-16",
     clearanceItems: [
-      { name: 'Outstanding Fees', status: 'failed', description: 'Balance: 500,000 UGX' },
-      { name: 'Room Condition', status: 'cleared', description: 'Room in good condition' },
-      { name: 'Library Books', status: 'cleared', description: 'All books returned' },
-      { name: 'Property Damage', status: 'failed', description: 'Damaged furniture reported' },
-      { name: 'Disciplinary Record', status: 'cleared', description: 'No incidents reported' },
+      {
+        name: "Outstanding Fees",
+        status: "failed",
+        description: "Balance: 500,000 UGX",
+      },
+      {
+        name: "Room Condition",
+        status: "cleared",
+        description: "Room in good condition",
+      },
+      {
+        name: "Library Books",
+        status: "cleared",
+        description: "All books returned",
+      },
+      {
+        name: "Property Damage",
+        status: "failed",
+        description: "Damaged furniture reported",
+      },
+      {
+        name: "Disciplinary Record",
+        status: "cleared",
+        description: "No incidents reported",
+      },
     ],
+    department: "Engineering",
+    photoUrl: "https://images.app.goo.gl/gK7qGEQfcGnVWwQd8",
   },
 ];
 
 export default function ClearanceManagement() {
-  const [clearances, setClearances] = useState<Clearance[]>(mockClearances);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedClearance, setSelectedClearance] = useState<Clearance | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [clearances] = useState<Clearance[]>(mockClearances);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedClearance, setSelectedClearance] = useState<Clearance | null>(
+    null
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value.toLowerCase());
   };
 
-  const filteredClearances = clearances.filter((clearance) =>
-    clearance.studentName.toLowerCase().includes(searchTerm) ||
-    clearance.registrationNumber.toLowerCase().includes(searchTerm) ||
-    clearance.roomNumber.toLowerCase().includes(searchTerm)
+  const filteredClearances = clearances.filter(
+    (clearance) =>
+      clearance.studentName.toLowerCase().includes(searchTerm) ||
+      clearance.registrationNumber.toLowerCase().includes(searchTerm) ||
+      clearance.roomNumber.toLowerCase().includes(searchTerm)
   );
 
-  const handleClearStudent = (clearance: Clearance) => {
-    const allCleared = clearance.clearanceItems.every(
-      (item) => item.status === 'cleared'
-    );
+  // Convert clearance data to the format expected by StudentClearanceModal
+  const mapToStudentData = (clearance: Clearance) => {
+    // Find the status of each clearance item
+    const hostelAdmin =
+      clearance.clearanceItems.find(
+        (item) => item.name === "Room Condition" || item.name.includes("Room")
+      )?.status || "pending";
 
-    if (allCleared) {
-      const updatedClearances = clearances.map((c) =>
-        c.id === clearance.id ? { ...c, status: 'Cleared' } : c
-      );
-      setClearances(updatedClearances);
-      toast({
-        title: "Clearance Approved",
-        description: `${clearance.studentName} has been successfully cleared.`,
-      });
-    } else {
-      toast({
-        title: "Cannot Clear Student",
-        description: "All clearance items must be cleared first.",
-        variant: "destructive",
-      });
-    }
-    setIsDetailsOpen(false);
+    const roomInspection =
+      clearance.clearanceItems.find(
+        (item) =>
+          item.name === "Property Damage" || item.name.includes("Property")
+      )?.status || "pending";
+
+    const keyProperty =
+      clearance.clearanceItems.find(
+        (item) => item.name.includes("Library") || item.name.includes("Books")
+      )?.status || "pending";
+
+    const finance =
+      clearance.clearanceItems.find(
+        (item) => item.name === "Outstanding Fees" || item.name.includes("Fees")
+      )?.status || "pending";
+
+    return {
+      id: clearance.id,
+      name: clearance.studentName,
+      studentNumber: clearance.registrationNumber,
+      department: clearance.department || "Not specified",
+      hostel: clearance.roomNumber.charAt(0) + " Block",
+      room: clearance.roomNumber,
+      photoUrl:
+        clearance.photoUrl || "https://images.app.goo.gl/gK7qGEQfcGnVWwQd8",
+      clearanceStatus: {
+        hostelAdmin: mapClearanceStatus(hostelAdmin),
+        roomInspection: mapClearanceStatus(roomInspection),
+        keyProperty: mapClearanceStatus(keyProperty),
+        finance: mapClearanceStatus(finance),
+      },
+    };
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedClearance(null);
   };
 
   return (
@@ -204,19 +312,19 @@ export default function ClearanceManagement() {
                 <TableCell>{clearance.roomNumber}</TableCell>
                 <TableCell>{clearance.clearanceType}</TableCell>
                 <TableCell>
-                  <span
-                    className={`status-badge ${
-                      clearance.status === 'Cleared'
-                        ? 'status-badge-paid'
-                        : clearance.status === 'Rejected'
-                        ? 'status-badge-overdue'
-                        : clearance.status === 'In Progress'
-                        ? 'status-badge-pending'
-                        : 'status-badge-maintenance'
-                    }`}
+                  <Badge
+                    variant={
+                      clearance.status === "Cleared"
+                        ? "default"
+                        : clearance.status === "Rejected"
+                        ? "destructive"
+                        : clearance.status === "In Progress"
+                        ? "secondary"
+                        : "outline"
+                    }
                   >
                     {clearance.status}
-                  </span>
+                  </Badge>
                 </TableCell>
                 <TableCell>{clearance.submittedDate}</TableCell>
                 <TableCell>
@@ -225,7 +333,7 @@ export default function ClearanceManagement() {
                     size="sm"
                     onClick={() => {
                       setSelectedClearance(clearance);
-                      setIsDetailsOpen(true);
+                      setIsModalOpen(true);
                     }}
                   >
                     View Details
@@ -237,82 +345,14 @@ export default function ClearanceManagement() {
         </Table>
       </div>
 
-      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Clearance Details</DialogTitle>
-            <DialogDescription>
-              Review clearance status and requirements
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedClearance && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold">Student Information</h4>
-                  <div className="mt-2 space-y-2 text-sm">
-                    <p>Name: {selectedClearance.studentName}</p>
-                    <p>Registration: {selectedClearance.registrationNumber}</p>
-                    <p>Room: {selectedClearance.roomNumber}</p>
-                    <p>Clearance Type: {selectedClearance.clearanceType}</p>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold">Current Status</h4>
-                  <div className="mt-2">
-                    <Badge variant={selectedClearance.status === 'Cleared' ? 'default' : 'secondary'}>
-                      {selectedClearance.status}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-4">Clearance Requirements</h4>
-                <div className="space-y-4">
-                  {selectedClearance.clearanceItems.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between rounded-lg border p-4"
-                    >
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {item.description}
-                        </p>
-                      </div>
-                      <Badge
-                        variant={
-                          item.status === 'cleared'
-                            ? 'default'
-                            : item.status === 'failed'
-                            ? 'destructive'
-                            : 'secondary'
-                        }
-                      >
-                        {item.status}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-4">
-                <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
-                  Close
-                </Button>
-                <Button
-                  onClick={() => handleClearStudent(selectedClearance)}
-                  disabled={selectedClearance.status === 'Cleared'}
-                >
-                  Clear Student
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Render the StudentClearanceModal when a clearance is selected */}
+      {selectedClearance && (
+        <StudentClearanceModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          student={mapToStudentData(selectedClearance)}
+        />
+      )}
     </div>
   );
 }
