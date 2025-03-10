@@ -7,15 +7,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AddRoomDialog as ImportedAddRoomDialog } from "@/components/room-management/add-room-dialog";
+import { AddRoomDialog } from "@/components/room-management/add-room-dialog";
+import { AllocateRoomDialog } from "@/components/room-management/allocate-room-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Building2 } from "lucide-react";
+import { Building2, Users } from "lucide-react";
 import { InputWithSearch } from "@/components/ui/input-with-search";
 import { AcademicPeriodSelector } from "@/components/room-management/academic-period-selector";
 import { RoomStatistics } from "@/components/room-management/room-statistics";
 import { RoomDetailsDialog } from "@/components/room-management/room-details-dialog";
 import { RoomFilters } from "@/components/room-management/room-filters";
 import { BulkActions } from "@/components/room-management/bulk-actions";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 // Extended Room interface with more details
@@ -124,17 +126,17 @@ export default function RoomManagement() {
   );
   const [selectedIntake, setSelectedIntake] = useState("february");
   const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
-  interface RoomFilters {
+  const [filters, setFilters] = useState<{
     block?: string;
     floor?: string;
     type?: string;
     status?: string;
     occupancy?: string;
-  }
-
-  const [filters, setFilters] = useState<RoomFilters>({});
+  }>({});
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isAllocateOpen, setIsAllocateOpen] = useState(false);
+  const [roomToAllocate, setRoomToAllocate] = useState<Room | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = (value: string) => {
@@ -143,10 +145,7 @@ export default function RoomManagement() {
 
   const handleLoadData = async () => {
     setIsLoading(true);
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Generate new mock data for the selected period
     const newRooms = generateMockRooms(Math.floor(Math.random() * 20) + 40);
     setRooms(newRooms);
 
@@ -159,10 +158,8 @@ export default function RoomManagement() {
 
   const handleApplyFilters = async () => {
     setIsLoading(true);
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Apply filters to the current rooms (in a real app, this would be a server call)
     const filteredRooms = mockRooms.filter((room) => {
       if (filters.block && room.block !== filters.block) return false;
       if (filters.floor && room.floor !== filters.floor) return false;
@@ -191,7 +188,6 @@ export default function RoomManagement() {
 
   const handleBulkAction = async (action: string) => {
     setIsLoading(true);
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     toast({
@@ -200,6 +196,64 @@ export default function RoomManagement() {
     });
     setSelectedRooms([]);
     setIsLoading(false);
+  };
+
+  const handleAllocateRoom = (room: Room) => {
+    if (room.status === "Maintenance") {
+      toast({
+        title: "Cannot Allocate Room",
+        description: "This room is currently under maintenance",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (room.status === "Full") {
+      toast({
+        title: "Cannot Allocate Room",
+        description: "This room is already at full capacity",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setRoomToAllocate(room);
+    setIsAllocateOpen(true);
+  };
+
+  const handleAllocateStudents = async (studentIds: string[]) => {
+    if (!roomToAllocate) return;
+
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const updatedRooms = rooms.map((room) => {
+      if (room.id === roomToAllocate.id) {
+        const newOccupied = room.occupied + studentIds.length;
+        return {
+          ...room,
+          occupied: newOccupied,
+          status: newOccupied >= room.capacity ? "Full" : "Available",
+        };
+      }
+      return room;
+    });
+
+    setRooms(updatedRooms);
+    setIsLoading(false);
+
+    toast({
+      title: "Room Allocated",
+      description: `Successfully allocated ${studentIds.length} student(s) to room ${roomToAllocate.number}`,
+    });
+  };
+
+  const handleAddRoom = (newRoom: Room) => {
+    setRooms((prevRooms) => [...prevRooms, newRoom]);
+    toast({
+      title: "Room Added",
+      description: `Successfully added room ${newRoom.number}`,
+    });
   };
 
   const filteredRooms = rooms.filter(
@@ -218,9 +272,7 @@ export default function RoomManagement() {
             Manage and monitor hostel rooms efficiently
           </p>
         </div>
-        <ImportedAddRoomDialog
-          onRoomAdded={(room: Room) => setRooms([...rooms, room])}
-        />
+        <AddRoomDialog onRoomAdded={handleAddRoom} />
       </div>
 
       <div className="flex items-center justify-between">
@@ -242,12 +294,24 @@ export default function RoomManagement() {
               placeholder="Search by room number, type, or status..."
             />
           </div>
-          {selectedRooms.length > 0 && (
-            <BulkActions
-              selectedRooms={selectedRooms}
-              onAction={handleBulkAction}
-            />
-          )}
+          <div className="flex items-center gap-2">
+            {selectedRooms.length > 0 && (
+              <BulkActions
+                selectedRooms={selectedRooms}
+                onAction={handleBulkAction}
+              />
+            )}
+            <Button
+              onClick={() => {
+                const room = rooms.find((r) => r.id === selectedRooms[0]);
+                if (room) handleAllocateRoom(room);
+              }}
+              disabled={selectedRooms.length !== 1 || isLoading}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Allocate Room
+            </Button>
+          </div>
         </div>
 
         <RoomFilters
@@ -339,9 +403,17 @@ export default function RoomManagement() {
                 </TableCell>
                 <TableCell>{room.price.toLocaleString()}</TableCell>
                 <TableCell className="text-right">
-                  <span className="text-sm text-muted-foreground">
-                    Click to view details
-                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAllocateRoom(room);
+                    }}
+                    disabled={room.status !== "Available"}
+                  >
+                    {room.status === "Available" ? "Allocate" : room.status}
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -354,39 +426,13 @@ export default function RoomManagement() {
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
       />
+
+      <AllocateRoomDialog
+        room={roomToAllocate}
+        open={isAllocateOpen}
+        onOpenChange={setIsAllocateOpen}
+        onAllocate={handleAllocateStudents}
+      />
     </div>
-  );
-}
-
-interface AddRoomDialogProps {
-  onRoomAdded: (room: Room) => void;
-}
-
-export function AddRoomDialog({
-  onRoomAdded,
-}: AddRoomDialogProps): JSX.Element {
-  return (
-    <button
-      onClick={() => {
-        const newRoom: Room = {
-          id: Date.now().toString(),
-          number: "",
-          block: "",
-          floor: "",
-          type: "Single",
-          capacity: 1,
-          occupied: 0,
-          price: 0,
-          features: [],
-          status: "Available",
-          maintenanceHistory: [],
-          currentOccupants: [],
-          amenities: [],
-        };
-        onRoomAdded(newRoom);
-      }}
-    >
-      Add Room
-    </button>
   );
 }

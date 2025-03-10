@@ -10,7 +10,15 @@ import {
   Utensils,
   Bell,
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 
 const occupancyData = [
@@ -154,9 +162,23 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={occupancyData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
+                  <XAxis
+                    dataKey="month"
+                    scale="point"
+                    padding={{ left: 10, right: 10 }}
+                  />
+                  <YAxis
+                    yAxisId="left"
+                    orientation="left"
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    tickFormatter={(value) =>
+                      `${(value / 1000000).toFixed(1)}M`
+                    }
+                  />
                   <Tooltip />
                   <Bar
                     yAxisId="left"

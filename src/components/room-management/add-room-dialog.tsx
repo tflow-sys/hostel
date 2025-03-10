@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -30,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import type { Room } from "@/pages/room-management";
 
 const formSchema = z.object({
   roomNumber: z.string().min(2, "Room number must be at least 2 characters"),
@@ -43,8 +45,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function AddRoomDialog() {
+interface AddRoomDialogProps {
+  onRoomAdded: (room: Room) => void;
+}
+
+export function AddRoomDialog({ onRoomAdded }: AddRoomDialogProps) {
   const { toast } = useToast();
+  const [isOpen, setIsOpen] = useState(false);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,8 +66,30 @@ export function AddRoomDialog() {
   });
 
   function onSubmit(data: FormValues) {
-    // TODO: Implement room creation logic
-    console.log(data);
+    const newRoom: Room = {
+      id: Date.now().toString(),
+      number: data.roomNumber,
+      block: data.block,
+      floor: data.floor,
+      type: data.type,
+      capacity: data.capacity,
+      occupied: 0,
+      price: data.price,
+      features: data.features.split(",").map((f) => f.trim()),
+      status: "Available",
+      maintenanceHistory: [],
+      currentOccupants: [],
+      amenities: [
+        { name: "Air Conditioner", status: "Working" },
+        { name: "Study Lamp", status: "Working" },
+        { name: "Ceiling Fan", status: "Working" },
+      ],
+    };
+
+    onRoomAdded(newRoom);
+    setIsOpen(false);
+    form.reset();
+
     toast({
       title: "Room Added Successfully",
       description: `Room ${data.roomNumber} has been added to the system.`,
@@ -68,7 +97,7 @@ export function AddRoomDialog() {
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
