@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 interface StatusItem {
   label: string;
@@ -12,7 +11,11 @@ interface StatusOverviewProps {
   className?: string;
 }
 
-export function StatusOverview({ title, items, className }: StatusOverviewProps) {
+export function StatusOverview({
+  title,
+  items,
+  className,
+}: StatusOverviewProps) {
   return (
     <Card className={className}>
       <CardHeader>
