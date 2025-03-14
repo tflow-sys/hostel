@@ -1,12 +1,11 @@
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Building2,
   CreditCard,
   LayoutDashboard,
   MessageSquare,
-  UserCheck,
   BarChart3,
   ChevronLeft,
   ChevronRight,
@@ -14,18 +13,18 @@ import {
   Users,
   BedDouble,
   Settings,
-} from 'lucide-react';
+} from "lucide-react";
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Room Management', href: '/rooms', icon: BedDouble },
-  { name: 'Student Management', href: '/students', icon: Users },
-  { name: 'Fee Management', href: '/fees', icon: CreditCard },
-  { name: 'Complaints', href: '/complaints', icon: MessageSquare },
-  { name: 'Attendance', href: '/attendance', icon: UserCheck },
-  { name: 'Clearance', href: '/clearance', icon: ClipboardCheck },
-  { name: 'Reports', href: '/reports', icon: BarChart3 },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Room Management", href: "/rooms", icon: BedDouble },
+  { name: "Student Room Mangt", href: "/students", icon: Users },
+  { name: "Accommodation Fees", href: "/fees", icon: CreditCard },
+  { name: "Complaints", href: "/complaints", icon: MessageSquare },
+  // { name: "Attendance", href: "/attendance", icon: UserCheck },
+  { name: "Clearance", href: "/clearance", icon: ClipboardCheck },
+  { name: "Reports", href: "/reports", icon: BarChart3 },
+  { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 interface SidebarProps {
@@ -39,8 +38,8 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
   return (
     <div
       className={cn(
-        'fixed inset-y-0 z-50 flex flex-col transition-all duration-300',
-        open ? 'w-64' : 'w-20'
+        "fixed inset-y-0 z-50 flex flex-col transition-all duration-300",
+        open ? "w-64" : "w-20"
       )}
     >
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-card px-6 pb-4 ring-1 ring-border">
@@ -48,8 +47,8 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
           <Link
             to="/"
             className={cn(
-              'flex items-center gap-x-3',
-              !open && 'justify-center w-full'
+              "flex items-center gap-x-3",
+              !open && "justify-center w-full"
             )}
           >
             <Building2 className="h-8 w-8 text-primary" />
@@ -82,11 +81,11 @@ export default function Sidebar({ open, setOpen }: SidebarProps) {
                       <Link
                         to={item.href}
                         className={cn(
-                          'flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
+                          "flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                           isActive
-                            ? 'bg-primary text-primary-foreground'
-                            : 'hover:bg-accent hover:text-accent-foreground',
-                          !open && 'justify-center'
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-accent hover:text-accent-foreground",
+                          !open && "justify-center"
                         )}
                       >
                         <Icon className="h-6 w-6 shrink-0" />

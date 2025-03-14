@@ -230,10 +230,12 @@ export default function RoomManagement() {
     const updatedRooms = rooms.map((room) => {
       if (room.id === roomToAllocate.id) {
         const newOccupied = room.occupied + studentIds.length;
+        const newStatus: "Available" | "Full" | "Maintenance" =
+          newOccupied >= room.capacity ? "Full" : "Available";
         return {
           ...room,
           occupied: newOccupied,
-          status: newOccupied >= room.capacity ? "Full" : "Available",
+          status: newStatus,
         };
       }
       return room;
